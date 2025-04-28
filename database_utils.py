@@ -1,33 +1,28 @@
 import yaml
 import sqlalchemy
 from sqlalchemy import inspect
-from sqlalchemy import text
 import psycopg2
-from data_extraction import DataExtractor
-from data_cleaning import DataCleaning
+import pandas as pd
 
 class DatabaseConnector:
     def __init__(self, yaml_file):
-        """Initialise with the path to a YAML file and calls read_db_creds method.""" # TODO UPDATE DOCSTRING
+        """
+        Initializes the DatabaseConnector with a path to the database credentials YAML file.
+
+        Args:
+            db_creds_path (str): Path to the YAML file containing database credentials.
+        """
         self.yaml_file = yaml_file
         self.db_creds = self.read_db_creds()
-        self.engine = self.init_db_engine()
-        ## self.table_names = self.list_db_tables()
-        ## table_name = str(input("Please select a table from the above options: "))
-        table_name = "legacy_users"
-        initialiser = DataExtractor(self.engine)
-        self.user_df = initialiser.read_rds_table(table_name)
-        initialiser = DataCleaning(self.user_df)
-        self.cleaned_user_df = initialiser.clean_user_data()
-        print("User data successfully cleaned")
-        # self.upload_to_db()
-        self.card_df = DataExtractor.retrieve_pdf_data()
-        initialiser = DataCleaning()
-        self.cleaned_card_df = initialiser.clean_card_data(self.card_df)
 
 
     def read_db_creds(self):
-        """Reads database credentials from the specified YAML file."""
+        """
+        Reads database credentials from the YAML file.
+
+        Returns:
+            dict: A dictionary containing database connection credentials.
+        """
         try:
             with open(self.yaml_file, 'r') as y:
                 return yaml.safe_load(y)
@@ -38,7 +33,12 @@ class DatabaseConnector:
             return {} # Return empty dict if error occurs 
             
     def init_db_engine(self):
-        """Initialises and returns an sqlalchemy database engine."""
+        """
+        Initialises and returns a SQLAlchemy database engine using the credentials.
+
+        Returns:
+            sqlalchemy.Engine: SQLAlchemy engine connected to the database.
+        """
         if not self.db_creds:
             print("Error: No database credentials found.")
             return None
@@ -60,31 +60,39 @@ class DatabaseConnector:
             print(f"Error: Failed to create database engine - {e}")
             return None
         
-    def list_db_tables(self):
-        """Returns table names from database using sqlalchemy inspect"""
-        inspector = inspect(self.engine)
-        table_names = inspector.get_table_names()
-        return table_names
-    
-    def upload_to_db(df_to_upload, new_db_name):
-        """Takes a pandas dataframe and uploads to the dim_users sales_data database."""
-
-        # df_to_upload = self.df_to_upload
-        HOST = 'localhost'
-        USER = 'postgres'
-        PASSWORD = 'Bertie'
-        DATABASE = 'sales_data'
-        PORT = 5432
-
-        engine = sqlalchemy.create_engine(f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
-        df_to_upload.to_sql(new_db_name, engine, if_exists='replace', index=False)
-        print("table uploaded successfully.")
-                
-        return None
+    def list_db_tables(self, engine):
+        """Returns table names from database using sqlalchemy inspect
         
+        Args:
+            sqlalchemy engine initialised in init_db_engine method
+            
+        Returns:
+            None
+            """
+        inspector = inspect(engine)
+        table_names = inspector.get_table_names()
+        print("Available tables:")
+        for idx, table in enumerate(table_names, 1):
+            print(f"{idx}. {table}")
+        return None
     
-if __name__=='__main__':
-    db_connector = DatabaseConnector(r"C:\Users\comma\VS Code projects\Python projects\mnrdc_project\MNRDC_project\db_creds.yaml")
-    # card_df = DataExtractor.retrieve_pdf_data()
-    # print(card_df.head(10))
-    
+    def upload_to_db(self, df_to_upload, new_db_name, engine=None):
+        """
+        Uploads a DataFrame to the database into the specified table.
+
+        Args:
+            df (pd.DataFrame): The DataFrame to upload.
+            table_name (str): Name of the target table in the database.
+
+        Returns:
+            None
+        """        
+        if engine is None:
+            engine = self.init_db_engine()
+        
+        try:
+            df_to_upload.to_sql(new_db_name, engine, if_exists='replace', index=False)
+            print("table uploaded successfully.")
+        except Exception as e:
+            print(f"Error uploading table: {e}")
+        return None

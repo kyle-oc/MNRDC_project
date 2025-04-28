@@ -1,1 +1,9 @@
 db_creds.yaml
+local_db_creds.yaml
+db_creds_aicore.yaml
+products.csv
+UTF-8orders_table.csv
+date_details.json
+__pycache__/data_cleaning.cpython-312.pyc
+__pycache__/data_extraction.cpython-312.pyc
+__pycache__/database_utils.cpython-312.pyc
