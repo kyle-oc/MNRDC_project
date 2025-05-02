@@ -8,6 +8,7 @@ This project extracts, cleans, and uploads data from various sources including R
 - `data_extraction.py`: Extracts data from RDS, PDF files, APIs, and S3.
 - `data_cleaning.py`: Cleans the extracted data for consistency and quality.
 - `main.py`: The main driver script that orchestrates extraction, cleaning, and uploading.
+- `mnrdc_project.session.sql`: Deals with conversion of data types, restructuring and cleaning of data, and adds primary and foreign keys to database.
 
 ## Setup Instructions
 1. Clone this repository.
@@ -23,11 +24,14 @@ This project extracts, cleans, and uploads data from various sources including R
     ```bash
     python main.py
     ```
+5. Run the MNDRC SQL script:
+   `mndrc_project.session.sql`
 
 ## How It Works
 - Choose the dataset you want to process from the menu.
 - The script will extract, clean, and ask whether you want to upload it.
 - Data will be stored into the correct dimension tables in your local database.
+- The SQL script will update database accordingly.
 
 ## Requirements
 - Python 3.9+

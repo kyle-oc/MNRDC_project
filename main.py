@@ -9,6 +9,9 @@ pdf_url = r'https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details
 
 
 def run_user_data():
+    """
+    Extracts, cleans, and optionally uploads user data to the local database.
+    """
     db_connector = DatabaseConnector(yaml_directory)
     engine = db_connector.init_db_engine()
     table_name = 'legacy_users'       
@@ -20,6 +23,9 @@ def run_user_data():
     ask_and_upload(cleaned_user_df, "dim_users")
     
 def run_card_data():
+    """
+    Extracts, cleans, and optionally uploads card data from a PDF to the local database.
+    """
     pdf_url=r'https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf'
     card_df = DataExtractor.retrieve_pdf_data(pdf_url)
     cleaned_card_df = DataCleaning.clean_card_data(card_df)
@@ -27,6 +33,9 @@ def run_card_data():
     ask_and_upload(cleaned_card_df, "dim_card_details")
 
 def run_store_data():
+    """
+    Extracts, cleans, and optionally uploads store data to the local database.
+    """
     db_connector = DatabaseConnector(yaml_directory)
     engine = db_connector.init_db_engine()
     table_name = 'legacy_store_details'       
@@ -37,6 +46,9 @@ def run_store_data():
     ask_and_upload(cleaned_stores_df, "dim_store_details")
         
 def run_products_data():
+    """
+    Extracts, cleans, and optionally uploads product data from S3 to the local database.
+    """
     local_path = r'C:\Users\comma\VS Code projects\Python projects\mnrdc_project\MNRDC_project\products.csv'
     products_df = DataExtractor.extract_from_s3('data-handling-public', 'products.csv', local_path)
     cleaned_products_df = DataCleaning.clean_product_data(products_df)
@@ -45,6 +57,9 @@ def run_products_data():
     ask_and_upload(fixed_weights_df, "dim_products")
         
 def run_orders_data():
+    """
+    Extracts, cleans, and optionally uploads order data to the local database.
+    """
     table_name = 'orders_table'
     connector = DatabaseConnector(yaml_directory)
     engine = connector.init_db_engine()
@@ -55,6 +70,9 @@ def run_orders_data():
     ask_and_upload(cleaned_orders_df, "dim_orders_details")
     
 def run_events_data():
+    """
+    Extracts, cleans, and optionally uploads event data from S3 to the local database.
+    """
     local_path = r"C:\Users\comma\VS Code projects\Python projects\mnrdc_project\MNRDC_project\date_details.json"
     events_df = DataExtractor.extract_from_s3('data-handling-public', 'date_details.json', local_path)
     cleaned_events_df = DataCleaning.clean_events_data(events_df)
@@ -62,6 +80,13 @@ def run_events_data():
     ask_and_upload(cleaned_events_df, "dim_date_times")
  
 def ask_and_upload(df, table_name):
+    """
+    Asks the user if they want to upload the cleaned DataFrame to the local database.
+
+    Args:
+        df (pd.DataFrame): The cleaned data to be uploaded.
+        table_name (str): The target table name in the database.
+    """
     while True:
         upload_choice = input("Would you like to upload cleaned data? Y or N: ").casefold()
         if upload_choice == "y":
@@ -74,6 +99,9 @@ def ask_and_upload(df, table_name):
             print("Please enter 'Y' or 'N'. ")    
 
 def display_menu():
+    """
+    Displays the main menu for selecting which dataset to process.
+    """
     print("\n Please select the dataset you want to process:")
     print("1  User Data")
     print("2  Card Data")
@@ -84,6 +112,10 @@ def display_menu():
     print("0  Exit\n")
 
 def main():
+    """
+    Main execution loop:
+    Displays the menu, handles user input, and runs the corresponding data processing function.
+    """
     runners = {
         "1": run_user_data,
         "2": run_card_data,

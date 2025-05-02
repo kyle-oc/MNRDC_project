@@ -155,6 +155,7 @@ class DataCleaning:
         Returns:
             pd.DataFrame: Cleaned store data.
         """        
+        
         # Drop obsolete index columns
         store_df = store_df.drop(['level_0','Unnamed: 0', 'index'], axis=1)
         
